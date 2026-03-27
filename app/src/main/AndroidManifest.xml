@@ -21,6 +21,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".activity.ShowtimeListActivity"
+            android:exported="false" />
+        <activity android:name=".activity.SeatSelectionActivity"
+            android:exported="false" />
+        <activity android:name=".activity.BookingConfirmActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

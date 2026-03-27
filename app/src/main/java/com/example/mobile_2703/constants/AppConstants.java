@@ -12,10 +12,17 @@ public final class AppConstants {
     // =========================================================
     // INTENT EXTRAS - Keys dùng khi truyền dữ liệu qua Intent
     // =========================================================
-    public static final String EXTRA_USER_ID     = "extra_user_id";
-    public static final String EXTRA_PRODUCT_ID  = "extra_product_id";
-    public static final String EXTRA_CATEGORY_ID = "extra_category_id";
-    public static final String EXTRA_MODE        = "extra_mode";
+    public static final String EXTRA_USER_ID      = "extra_user_id";
+    public static final String EXTRA_PRODUCT_ID   = "extra_product_id";
+    public static final String EXTRA_CATEGORY_ID  = "extra_category_id";
+    public static final String EXTRA_MODE         = "extra_mode";
+
+    // Booking flow extras
+    public static final String EXTRA_MOVIE_ID     = "extra_movie_id";
+    public static final String EXTRA_THEATER_ID   = "extra_theater_id";
+    public static final String EXTRA_SHOWTIME_ID  = "extra_showtime_id";
+    public static final String EXTRA_SEAT_NUMBER  = "extra_seat_number";
+    public static final String EXTRA_TOTAL_PRICE  = "extra_total_price";
 
     // =========================================================
     // ACTIVITY MODE - Phân biệt CREATE vs EDIT
@@ -37,4 +44,5 @@ public final class AppConstants {
     public static final int REQUEST_ADD_ITEM    = 100;
     public static final int REQUEST_EDIT_ITEM   = 101;
     public static final int REQUEST_PICK_IMAGE  = 102;
+    public static final int REQUEST_LOGIN       = 200;
 }
