@@ -100,6 +100,17 @@ public class ShowtimeDAO extends BaseDAO<Showtime> {
     }
 
     /**
+     * Lấy suất chiếu theo phim VÀ rạp (kết hợp cả hai điều kiện).
+     */
+    public List<Showtime> getByMovieAndTheaterId(int movieId, int theaterId) {
+        String sql = JOIN_QUERY
+                + " WHERE s." + DBConstants.Showtime.COL_MOVIE_ID   + " = ?"
+                + " AND s."   + DBConstants.Showtime.COL_THEATER_ID + " = ?"
+                + " ORDER BY s." + DBConstants.Showtime.COL_SHOW_DATE + ", s." + DBConstants.Showtime.COL_SHOW_TIME;
+        return queryWithJoin(sql, new String[]{String.valueOf(movieId), String.valueOf(theaterId)});
+    }
+
+    /**
      * Lấy suất chiếu theo ngày.
      */
     public List<Showtime> getByDate(String date) {

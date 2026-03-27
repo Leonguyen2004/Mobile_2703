@@ -16,7 +16,7 @@ public final class DBConstants {
     // DATABASE CONFIG
     // =========================================================
     public static final String DATABASE_NAME    = "cinema_database.db";
-    public static final int    DATABASE_VERSION = 1;
+    public static final int    DATABASE_VERSION = 2;
 
     // =========================================================
     // TABLE NAMES

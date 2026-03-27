@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.mobile_2703.LoginActivity;
 import com.example.mobile_2703.R;
 import com.example.mobile_2703.utils.SessionManager;
 import com.google.android.material.card.MaterialCardView;
@@ -127,7 +128,7 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
             return true;
         } else if (id == R.id.menu_logout) {
-            sessionManager.clearSession();
+            sessionManager.logout();
             Toast.makeText(this, R.string.logout_success, Toast.LENGTH_SHORT).show();
             recreate();
             return true;

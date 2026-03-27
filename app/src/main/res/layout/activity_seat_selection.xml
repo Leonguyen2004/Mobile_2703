@@ -142,30 +142,59 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom bar: ghế đã chọn + nút xác nhận -->
+    <!-- Bottom bar: ghế đã chọn + tổng tiền + nút xác nhận -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:gravity="center_vertical"
+        android:orientation="vertical"
         android:background="#F5F5F5"
         android:elevation="8dp">
 
-        <TextView
-            android:id="@+id/tv_selected_seat"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <!-- Dòng thông tin ghế + tổng tiền -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Chưa chọn ghế"
-            android:textSize="14sp" />
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="4dp"
+            android:gravity="center_vertical">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_confirm_seat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Xác nhận"
-            android:enabled="false" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_selected_seat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chưa chọn ghế"
+                    android:textSize="13sp"
+                    android:textColor="#424242" />
+
+                <TextView
+                    android:id="@+id/tv_total_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#E65100" />
+
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_confirm_seat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xác nhận"
+                android:enabled="false" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

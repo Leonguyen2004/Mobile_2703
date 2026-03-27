@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.mobile_2703.R;
+import com.example.mobile_2703.constants.AppConstants;
 import com.example.mobile_2703.dao.MovieDAO;
 import com.example.mobile_2703.model.Movie;
 
@@ -29,7 +30,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        long movieId = getIntent().getLongExtra(MovieListActivity.EXTRA_MOVIE_ID, -1);
+        long movieId = getIntent().getLongExtra(AppConstants.EXTRA_MOVIE_ID, -1);
         if (movieId == -1) {
             Toast.makeText(this, "Không tìm thấy phim", Toast.LENGTH_SHORT).show();
             finish();
@@ -55,7 +56,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                     getPackageName(),
                     getPackageName() + ".activity.ShowtimeListActivity"
             );
-            intent.putExtra(MovieListActivity.EXTRA_MOVIE_ID, movieId);
+            intent.putExtra(AppConstants.EXTRA_MOVIE_ID, movieId);
             startActivity(intent);
         });
     }

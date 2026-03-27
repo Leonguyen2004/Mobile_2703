@@ -152,7 +152,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // --- Users ---
         db.execSQL("INSERT INTO " + DBConstants.Table.USER
                 + " (username, password, full_name, email, phone, role) VALUES "
-                + "('admin', 'admin123', 'Administrator', 'admin@cinema.com', '0900000000', 'admin');");
+                + "('admin', 'admin', 'Administrator', 'admin@cinema.com', '0900000000', 'admin');");
         db.execSQL("INSERT INTO " + DBConstants.Table.USER
                 + " (username, password, full_name, email, phone, role) VALUES "
                 + "('user1', '123456', 'Nguyen Van An', 'an@gmail.com', '0911111111', 'user');");
