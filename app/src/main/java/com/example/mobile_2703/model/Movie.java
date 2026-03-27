@@ -1,40 +1,46 @@
+// FILE: app/src/main/java/com/example/mobile_2703/model/Movie.java
 package com.example.mobile_2703.model;
 
-/**
- * Model tương ứng với bảng movies.
- */
 public class Movie {
 
-    private int    id;
+    private long   id;
     private String title;
     private String genre;
-    private int    durationMin;
+    private int    duration;
     private String description;
     private String posterUrl;
     private double rating;
-    private String releaseDate;
 
-    // =========================================================
-    // Constructors
-    // =========================================================
     public Movie() {}
 
-    public Movie(String title, String genre, int durationMin,
-                 String description, String posterUrl, double rating, String releaseDate) {
+    /** Constructor đầy đủ (kèm id — dùng khi đọc từ DB). */
+    public Movie(long id, String title, String genre, int duration,
+                 String description, String posterUrl, double rating) {
+        this.id          = id;
         this.title       = title;
         this.genre       = genre;
-        this.durationMin = durationMin;
+        this.duration    = duration;
         this.description = description;
         this.posterUrl   = posterUrl;
         this.rating      = rating;
-        this.releaseDate = releaseDate;
+    }
+
+    /** Constructor không id (dùng khi insert mới). */
+    public Movie(String title, String genre, int duration,
+                 String description, String posterUrl, double rating) {
+        this.title       = title;
+        this.genre       = genre;
+        this.duration    = duration;
+        this.description = description;
+        this.posterUrl   = posterUrl;
+        this.rating      = rating;
     }
 
     // =========================================================
     // Getters & Setters
     // =========================================================
-    public int    getId()              { return id; }
-    public void   setId(int id)        { this.id = id; }
+    public long   getId()              { return id; }
+    public void   setId(long id)       { this.id = id; }
 
     public String getTitle()           { return title; }
     public void   setTitle(String v)   { this.title = v; }
@@ -42,20 +48,17 @@ public class Movie {
     public String getGenre()           { return genre; }
     public void   setGenre(String v)   { this.genre = v; }
 
-    public int    getDurationMin()        { return durationMin; }
-    public void   setDurationMin(int v)   { this.durationMin = v; }
+    public int    getDuration()        { return duration; }
+    public void   setDuration(int v)   { this.duration = v; }
 
-    public String getDescription()        { return description; }
-    public void   setDescription(String v){ this.description = v; }
+    public String getDescription()           { return description; }
+    public void   setDescription(String v)   { this.description = v; }
 
-    public String getPosterUrl()          { return posterUrl; }
-    public void   setPosterUrl(String v)  { this.posterUrl = v; }
+    public String getPosterUrl()             { return posterUrl; }
+    public void   setPosterUrl(String v)     { this.posterUrl = v; }
 
-    public double getRating()             { return rating; }
-    public void   setRating(double v)     { this.rating = v; }
-
-    public String getReleaseDate()        { return releaseDate; }
-    public void   setReleaseDate(String v){ this.releaseDate = v; }
+    public double getRating()                { return rating; }
+    public void   setRating(double v)        { this.rating = v; }
 
     @Override
     public String toString() {
