@@ -10,10 +10,6 @@ import com.example.mobile_2703.constants.DBConstants;
 /**
  * DatabaseHelper - Quản lý việc tạo và nâng cấp database SQLite.
  *
- * HOW TO USE:
- *   - Thêm bảng mới: khai báo CREATE_TABLE_XXX trong class này và gọi trong onCreate()
- *   - Khi thay đổi schema: tăng DATABASE_VERSION lên, xử lý migration trong onUpgrade()
- *
  * SINGLETON PATTERN: Chỉ dùng DatabaseHelper.getInstance(context) để lấy instance.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -22,46 +18,75 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance;
 
     // =========================================================
-    // 1. TẠO BẢNG MỚI: Thêm câu SQL CREATE TABLE vào đây
+    // CREATE TABLE STATEMENTS
     // =========================================================
 
-    /** Bảng User */
+    /** Bảng users */
     private static final String CREATE_TABLE_USER =
             "CREATE TABLE " + DBConstants.Table.USER + " ("
-                    + DBConstants.User.COL_ID          + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + DBConstants.User.COL_USERNAME     + " TEXT NOT NULL UNIQUE, "
-                    + DBConstants.User.COL_PASSWORD     + " TEXT NOT NULL, "
-                    + DBConstants.User.COL_FULL_NAME    + " TEXT, "
-                    + DBConstants.User.COL_EMAIL        + " TEXT, "
-                    + DBConstants.User.COL_ROLE         + " TEXT DEFAULT 'user', "
-                    + DBConstants.User.COL_CREATED_AT   + " TEXT DEFAULT (datetime('now','localtime'))"
+                    + DBConstants.User.COL_ID         + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + DBConstants.User.COL_USERNAME   + " TEXT NOT NULL UNIQUE, "
+                    + DBConstants.User.COL_PASSWORD   + " TEXT NOT NULL, "
+                    + DBConstants.User.COL_FULL_NAME  + " TEXT, "
+                    + DBConstants.User.COL_EMAIL      + " TEXT, "
+                    + DBConstants.User.COL_PHONE      + " TEXT, "
+                    + DBConstants.User.COL_ROLE       + " TEXT DEFAULT 'user', "
+                    + DBConstants.User.COL_CREATED_AT + " TEXT DEFAULT (datetime('now','localtime'))"
                     + ");";
 
-    /** Bảng Category */
-    private static final String CREATE_TABLE_CATEGORY =
-            "CREATE TABLE " + DBConstants.Table.CATEGORY + " ("
-                    + DBConstants.Category.COL_ID       + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + DBConstants.Category.COL_NAME     + " TEXT NOT NULL, "
-                    + DBConstants.Category.COL_DESC     + " TEXT"
+    /** Bảng movies */
+    private static final String CREATE_TABLE_MOVIE =
+            "CREATE TABLE " + DBConstants.Table.MOVIE + " ("
+                    + DBConstants.Movie.COL_ID           + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + DBConstants.Movie.COL_TITLE        + " TEXT NOT NULL, "
+                    + DBConstants.Movie.COL_GENRE        + " TEXT, "
+                    + DBConstants.Movie.COL_DURATION_MIN + " INTEGER DEFAULT 0, "
+                    + DBConstants.Movie.COL_DESCRIPTION  + " TEXT, "
+                    + DBConstants.Movie.COL_POSTER_URL   + " TEXT, "
+                    + DBConstants.Movie.COL_RATING       + " REAL DEFAULT 0.0, "
+                    + DBConstants.Movie.COL_RELEASE_DATE + " TEXT"
                     + ");";
 
-    /** Bảng Product */
-    private static final String CREATE_TABLE_PRODUCT =
-            "CREATE TABLE " + DBConstants.Table.PRODUCT + " ("
-                    + DBConstants.Product.COL_ID          + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    + DBConstants.Product.COL_NAME        + " TEXT NOT NULL, "
-                    + DBConstants.Product.COL_PRICE       + " REAL NOT NULL DEFAULT 0, "
-                    + DBConstants.Product.COL_DESCRIPTION + " TEXT, "
-                    + DBConstants.Product.COL_IMAGE_URL   + " TEXT, "
-                    + DBConstants.Product.COL_STOCK       + " INTEGER DEFAULT 0, "
-                    + DBConstants.Product.COL_CATEGORY_ID + " INTEGER, "
-                    + DBConstants.Product.COL_CREATED_AT  + " TEXT DEFAULT (datetime('now','localtime')), "
-                    + "FOREIGN KEY (" + DBConstants.Product.COL_CATEGORY_ID + ") "
-                    + "REFERENCES " + DBConstants.Table.CATEGORY + "(" + DBConstants.Category.COL_ID + ")"
+    /** Bảng theaters */
+    private static final String CREATE_TABLE_THEATER =
+            "CREATE TABLE " + DBConstants.Table.THEATER + " ("
+                    + DBConstants.Theater.COL_ID          + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + DBConstants.Theater.COL_NAME        + " TEXT NOT NULL, "
+                    + DBConstants.Theater.COL_LOCATION    + " TEXT, "
+                    + DBConstants.Theater.COL_TOTAL_SEATS + " INTEGER DEFAULT 100"
                     + ");";
 
-    // TODO: Thêm CREATE TABLE mới ở đây khi có đề bài
-    // private static final String CREATE_TABLE_ORDER = ...
+    /** Bảng showtimes (FK: movie_id -> movies, theater_id -> theaters) */
+    private static final String CREATE_TABLE_SHOWTIME =
+            "CREATE TABLE " + DBConstants.Table.SHOWTIME + " ("
+                    + DBConstants.Showtime.COL_ID              + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + DBConstants.Showtime.COL_MOVIE_ID        + " INTEGER NOT NULL, "
+                    + DBConstants.Showtime.COL_THEATER_ID      + " INTEGER NOT NULL, "
+                    + DBConstants.Showtime.COL_SHOW_DATE       + " TEXT NOT NULL, "
+                    + DBConstants.Showtime.COL_SHOW_TIME       + " TEXT NOT NULL, "
+                    + DBConstants.Showtime.COL_PRICE           + " REAL NOT NULL DEFAULT 0, "
+                    + DBConstants.Showtime.COL_AVAILABLE_SEATS + " INTEGER DEFAULT 0, "
+                    + "FOREIGN KEY (" + DBConstants.Showtime.COL_MOVIE_ID   + ") "
+                    + "REFERENCES " + DBConstants.Table.MOVIE   + "(" + DBConstants.Movie.COL_ID   + "), "
+                    + "FOREIGN KEY (" + DBConstants.Showtime.COL_THEATER_ID + ") "
+                    + "REFERENCES " + DBConstants.Table.THEATER + "(" + DBConstants.Theater.COL_ID + ")"
+                    + ");";
+
+    /** Bảng tickets (FK: user_id -> users, showtime_id -> showtimes) */
+    private static final String CREATE_TABLE_TICKET =
+            "CREATE TABLE " + DBConstants.Table.TICKET + " ("
+                    + DBConstants.Ticket.COL_ID           + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + DBConstants.Ticket.COL_USER_ID      + " INTEGER NOT NULL, "
+                    + DBConstants.Ticket.COL_SHOWTIME_ID  + " INTEGER NOT NULL, "
+                    + DBConstants.Ticket.COL_SEAT_NUMBER  + " TEXT NOT NULL, "
+                    + DBConstants.Ticket.COL_TOTAL_PRICE  + " REAL NOT NULL DEFAULT 0, "
+                    + DBConstants.Ticket.COL_BOOKING_TIME + " TEXT DEFAULT (datetime('now','localtime')), "
+                    + DBConstants.Ticket.COL_STATUS       + " TEXT DEFAULT 'confirmed', "
+                    + "FOREIGN KEY (" + DBConstants.Ticket.COL_USER_ID     + ") "
+                    + "REFERENCES " + DBConstants.Table.USER     + "(" + DBConstants.User.COL_ID       + "), "
+                    + "FOREIGN KEY (" + DBConstants.Ticket.COL_SHOWTIME_ID + ") "
+                    + "REFERENCES " + DBConstants.Table.SHOWTIME + "(" + DBConstants.Showtime.COL_ID   + ")"
+                    + ");";
 
     // =========================================================
     // SINGLETON
@@ -84,16 +109,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         Log.d(TAG, "Creating database v" + DBConstants.DATABASE_VERSION);
 
-        // Bật hỗ trợ FOREIGN KEY
         db.execSQL("PRAGMA foreign_keys = ON;");
 
-        // 2. TẠO BẢNG MỚI: Gọi execSQL cho từng bảng ở đây
         db.execSQL(CREATE_TABLE_USER);
-        db.execSQL(CREATE_TABLE_CATEGORY);
-        db.execSQL(CREATE_TABLE_PRODUCT);
-        // db.execSQL(CREATE_TABLE_ORDER); // Thêm bảng mới vào đây
+        db.execSQL(CREATE_TABLE_MOVIE);
+        db.execSQL(CREATE_TABLE_THEATER);
+        db.execSQL(CREATE_TABLE_SHOWTIME);
+        db.execSQL(CREATE_TABLE_TICKET);
 
-        // Seed dữ liệu mẫu
         seedData(db);
 
         Log.d(TAG, "Database created successfully");
@@ -103,21 +126,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.w(TAG, "Upgrading database from v" + oldVersion + " to v" + newVersion);
 
-        // Khi thêm bảng mới hoặc thay đổi schema:
-        // - Tăng DATABASE_VERSION trong DBConstants
-        // - Xử lý migration tại đây thay vì drop toàn bộ
-        //
-        // Ví dụ migration:
-        // if (oldVersion < 2) {
-        //     db.execSQL("ALTER TABLE user ADD COLUMN phone TEXT;");
-        // }
-        // if (oldVersion < 3) {
-        //     db.execSQL(CREATE_TABLE_ORDER);
-        // }
-
-        // Development only - xóa và tạo lại (XÓA khi release)
-        db.execSQL("DROP TABLE IF EXISTS " + DBConstants.Table.PRODUCT);
-        db.execSQL("DROP TABLE IF EXISTS " + DBConstants.Table.CATEGORY);
+        // Drop tables in reverse FK order
+        db.execSQL("DROP TABLE IF EXISTS " + DBConstants.Table.TICKET);
+        db.execSQL("DROP TABLE IF EXISTS " + DBConstants.Table.SHOWTIME);
+        db.execSQL("DROP TABLE IF EXISTS " + DBConstants.Table.THEATER);
+        db.execSQL("DROP TABLE IF EXISTS " + DBConstants.Table.MOVIE);
         db.execSQL("DROP TABLE IF EXISTS " + DBConstants.Table.USER);
         onCreate(db);
     }
@@ -125,44 +138,95 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
-        // Bật FOREIGN KEY mỗi lần mở (SQLite yêu cầu bật lại sau mỗi connection)
         if (!db.isReadOnly()) {
             db.execSQL("PRAGMA foreign_keys = ON;");
         }
     }
 
     // =========================================================
-    // SEED DATA - Dữ liệu mẫu ban đầu
+    // SEED DATA
     // =========================================================
     private void seedData(SQLiteDatabase db) {
         Log.d(TAG, "Seeding initial data...");
 
-        // Seed admin user (password: admin123 - thực tế nên hash)
+        // --- Users ---
         db.execSQL("INSERT INTO " + DBConstants.Table.USER
-                + " (username, password, full_name, email, role) VALUES "
-                + "('admin', 'admin123', 'Administrator', 'admin@example.com', 'admin');");
+                + " (username, password, full_name, email, phone, role) VALUES "
+                + "('admin', 'admin123', 'Administrator', 'admin@cinema.com', '0900000000', 'admin');");
+        db.execSQL("INSERT INTO " + DBConstants.Table.USER
+                + " (username, password, full_name, email, phone, role) VALUES "
+                + "('user1', '123456', 'Nguyen Van An', 'an@gmail.com', '0911111111', 'user');");
+        db.execSQL("INSERT INTO " + DBConstants.Table.USER
+                + " (username, password, full_name, email, phone, role) VALUES "
+                + "('user2', '123456', 'Tran Thi Bich', 'bich@gmail.com', '0922222222', 'user');");
 
-        // Seed categories mẫu
-        db.execSQL("INSERT INTO " + DBConstants.Table.CATEGORY
-                + " (name, description) VALUES "
-                + "('Electronics', 'Electronic devices and accessories');");
-        db.execSQL("INSERT INTO " + DBConstants.Table.CATEGORY
-                + " (name, description) VALUES "
-                + "('Clothing', 'Fashion and apparel');");
-        db.execSQL("INSERT INTO " + DBConstants.Table.CATEGORY
-                + " (name, description) VALUES "
-                + "('Books', 'Books and stationery');");
+        // --- Movies ---
+        db.execSQL("INSERT INTO " + DBConstants.Table.MOVIE
+                + " (title, genre, duration_min, description, rating, release_date) VALUES "
+                + "('Avengers: Endgame', 'Action/Sci-Fi', 181, "
+                + "'The Avengers assemble once more in order to reverse Thanos'' actions.', "
+                + "8.4, '2019-04-26');");
+        db.execSQL("INSERT INTO " + DBConstants.Table.MOVIE
+                + " (title, genre, duration_min, description, rating, release_date) VALUES "
+                + "('Inception', 'Sci-Fi/Thriller', 148, "
+                + "'A thief who steals corporate secrets through dream-sharing technology.', "
+                + "8.8, '2010-07-16');");
+        db.execSQL("INSERT INTO " + DBConstants.Table.MOVIE
+                + " (title, genre, duration_min, description, rating, release_date) VALUES "
+                + "('The Dark Knight', 'Action/Crime', 152, "
+                + "'Batman faces the Joker, a criminal mastermind who wants to plunge Gotham into anarchy.', "
+                + "9.0, '2008-07-18');");
+        db.execSQL("INSERT INTO " + DBConstants.Table.MOVIE
+                + " (title, genre, duration_min, description, rating, release_date) VALUES "
+                + "('Interstellar', 'Sci-Fi/Drama', 169, "
+                + "'A team of explorers travel through a wormhole in space.', "
+                + "8.6, '2014-11-07');");
 
-        // Seed products mẫu
-        db.execSQL("INSERT INTO " + DBConstants.Table.PRODUCT
-                + " (name, price, description, stock, category_id) VALUES "
-                + "('Smartphone XYZ', 299.99, 'Latest smartphone model', 50, 1);");
-        db.execSQL("INSERT INTO " + DBConstants.Table.PRODUCT
-                + " (name, price, description, stock, category_id) VALUES "
-                + "('Laptop Pro', 999.99, 'High performance laptop', 20, 1);");
-        db.execSQL("INSERT INTO " + DBConstants.Table.PRODUCT
-                + " (name, price, description, stock, category_id) VALUES "
-                + "('T-Shirt Basic', 19.99, 'Comfortable cotton t-shirt', 100, 2);");
+        // --- Theaters ---
+        db.execSQL("INSERT INTO " + DBConstants.Table.THEATER
+                + " (name, location, total_seats) VALUES "
+                + "('CGV Vincom Center', '72 Le Thanh Ton, Q.1, TP.HCM', 120);");
+        db.execSQL("INSERT INTO " + DBConstants.Table.THEATER
+                + " (name, location, total_seats) VALUES "
+                + "('Lotte Cinema Tay Ho', 'Tay Ho, Ha Noi', 100);");
+        db.execSQL("INSERT INTO " + DBConstants.Table.THEATER
+                + " (name, location, total_seats) VALUES "
+                + "('BHD Star Bitexco', '2 Hai Trieu, Q.1, TP.HCM', 80);");
+
+        // --- Showtimes ---
+        // Movie 1 (Avengers) - Theater 1 & 2
+        db.execSQL("INSERT INTO " + DBConstants.Table.SHOWTIME
+                + " (movie_id, theater_id, show_date, show_time, price, available_seats) VALUES "
+                + "(1, 1, '2026-03-28', '10:00', 90000, 120);");
+        db.execSQL("INSERT INTO " + DBConstants.Table.SHOWTIME
+                + " (movie_id, theater_id, show_date, show_time, price, available_seats) VALUES "
+                + "(1, 2, '2026-03-28', '13:30', 85000, 100);");
+
+        // Movie 2 (Inception) - Theater 1 & 3
+        db.execSQL("INSERT INTO " + DBConstants.Table.SHOWTIME
+                + " (movie_id, theater_id, show_date, show_time, price, available_seats) VALUES "
+                + "(2, 1, '2026-03-29', '15:00', 90000, 118);");
+        db.execSQL("INSERT INTO " + DBConstants.Table.SHOWTIME
+                + " (movie_id, theater_id, show_date, show_time, price, available_seats) VALUES "
+                + "(2, 3, '2026-03-29', '18:30', 80000, 80);");
+
+        // Movie 3 (The Dark Knight) - Theater 2
+        db.execSQL("INSERT INTO " + DBConstants.Table.SHOWTIME
+                + " (movie_id, theater_id, show_date, show_time, price, available_seats) VALUES "
+                + "(3, 2, '2026-03-30', '20:00', 85000, 95);");
+
+        // Movie 4 (Interstellar) - Theater 3
+        db.execSQL("INSERT INTO " + DBConstants.Table.SHOWTIME
+                + " (movie_id, theater_id, show_date, show_time, price, available_seats) VALUES "
+                + "(4, 3, '2026-03-30', '09:00', 80000, 78);");
+
+        // --- Tickets (sample bookings by user1) ---
+        db.execSQL("INSERT INTO " + DBConstants.Table.TICKET
+                + " (user_id, showtime_id, seat_number, total_price, status) VALUES "
+                + "(2, 1, 'A01', 90000, 'confirmed');");
+        db.execSQL("INSERT INTO " + DBConstants.Table.TICKET
+                + " (user_id, showtime_id, seat_number, total_price, status) VALUES "
+                + "(2, 3, 'B05', 90000, 'confirmed');");
 
         Log.d(TAG, "Seed data inserted successfully");
     }

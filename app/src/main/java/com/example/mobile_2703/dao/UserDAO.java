@@ -9,17 +9,9 @@ import android.util.Log;
 import com.example.mobile_2703.constants.DBConstants;
 import com.example.mobile_2703.model.User;
 
-import java.util.List;
-
 /**
- * UserDAO - Xử lý toàn bộ thao tác CRUD cho bảng "user".
- *
- * Kế thừa CRUD cơ bản từ BaseDAO, thêm các query đặc thù cho User.
- *
- * USAGE:
- *   UserDAO userDAO = new UserDAO(context);
- *   User user = userDAO.login("admin", "admin123");
- *   List<User> users = userDAO.getAll();
+ * UserDAO - DAO cho bảng users.
+ * Kế thừa BaseDAO, thêm các query đặc thù: login, findByUsername.
  */
 public class UserDAO extends BaseDAO<User> {
 
@@ -35,26 +27,28 @@ public class UserDAO extends BaseDAO<User> {
 
     @Override
     protected ContentValues toContentValues(User user) {
-        ContentValues values = new ContentValues();
-        values.put(DBConstants.User.COL_USERNAME,  user.getUsername());
-        values.put(DBConstants.User.COL_PASSWORD,  user.getPassword());
-        values.put(DBConstants.User.COL_FULL_NAME, user.getFullName());
-        values.put(DBConstants.User.COL_EMAIL,     user.getEmail());
-        values.put(DBConstants.User.COL_ROLE,      user.getRole());
-        return values;
+        ContentValues cv = new ContentValues();
+        cv.put(DBConstants.User.COL_USERNAME,  user.getUsername());
+        cv.put(DBConstants.User.COL_PASSWORD,  user.getPassword());
+        cv.put(DBConstants.User.COL_FULL_NAME, user.getFullName());
+        cv.put(DBConstants.User.COL_EMAIL,     user.getEmail());
+        cv.put(DBConstants.User.COL_PHONE,     user.getPhone());
+        cv.put(DBConstants.User.COL_ROLE,      user.getRole());
+        return cv;
     }
 
     @Override
     protected User fromCursor(Cursor cursor) {
-        return new User(
-                getInt(cursor,    DBConstants.User.COL_ID),
-                getString(cursor, DBConstants.User.COL_USERNAME),
-                getString(cursor, DBConstants.User.COL_PASSWORD),
-                getString(cursor, DBConstants.User.COL_FULL_NAME),
-                getString(cursor, DBConstants.User.COL_EMAIL),
-                getString(cursor, DBConstants.User.COL_ROLE),
-                getString(cursor, DBConstants.User.COL_CREATED_AT)
-        );
+        User user = new User();
+        user.setId(        getInt(cursor,    DBConstants.User.COL_ID));
+        user.setUsername(  getString(cursor, DBConstants.User.COL_USERNAME));
+        user.setPassword(  getString(cursor, DBConstants.User.COL_PASSWORD));
+        user.setFullName(  getString(cursor, DBConstants.User.COL_FULL_NAME));
+        user.setEmail(     getString(cursor, DBConstants.User.COL_EMAIL));
+        user.setPhone(     getString(cursor, DBConstants.User.COL_PHONE));
+        user.setRole(      getString(cursor, DBConstants.User.COL_ROLE));
+        user.setCreatedAt( getString(cursor, DBConstants.User.COL_CREATED_AT));
+        return user;
     }
 
     // =========================================================
@@ -62,105 +56,54 @@ public class UserDAO extends BaseDAO<User> {
     // =========================================================
 
     /**
-     * Đăng nhập: tìm user theo username và password.
-     * @return User nếu khớp, null nếu sai thông tin.
+     * Xác thực đăng nhập.
+     * @return User nếu đúng username & password, null nếu sai.
      */
     public User login(String username, String password) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        User user = null;
         Cursor cursor = null;
         try {
             cursor = db.query(
-                    tableName, null,
-                    DBConstants.User.COL_USERNAME + " = ? AND "
-                            + DBConstants.User.COL_PASSWORD + " = ?",
+                    tableName,
+                    null,
+                    DBConstants.User.COL_USERNAME + " = ? AND " + DBConstants.User.COL_PASSWORD + " = ?",
                     new String[]{username, password},
                     null, null, null
             );
             if (cursor != null && cursor.moveToFirst()) {
-                user = fromCursor(cursor);
+                return fromCursor(cursor);
             }
         } catch (Exception e) {
             Log.e(TAG, "Login error: " + e.getMessage());
         } finally {
             if (cursor != null) cursor.close();
         }
-        return user;
-    }
-
-    /**
-     * Kiểm tra username đã tồn tại chưa.
-     */
-    public boolean isUsernameExists(String username) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = null;
-        boolean exists = false;
-        try {
-            cursor = db.query(
-                    tableName,
-                    new String[]{DBConstants.User.COL_ID},
-                    DBConstants.User.COL_USERNAME + " = ?",
-                    new String[]{username},
-                    null, null, null
-            );
-            exists = cursor != null && cursor.getCount() > 0;
-        } catch (Exception e) {
-            Log.e(TAG, "isUsernameExists error: " + e.getMessage());
-        } finally {
-            if (cursor != null) cursor.close();
-        }
-        return exists;
+        return null;
     }
 
     /**
      * Tìm user theo username.
+     * @return User hoặc null.
      */
-    public User getByUsername(String username) {
+    public User findByUsername(String username) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        User user = null;
         Cursor cursor = null;
         try {
             cursor = db.query(
-                    tableName, null,
+                    tableName,
+                    null,
                     DBConstants.User.COL_USERNAME + " = ?",
                     new String[]{username},
                     null, null, null
             );
             if (cursor != null && cursor.moveToFirst()) {
-                user = fromCursor(cursor);
+                return fromCursor(cursor);
             }
         } catch (Exception e) {
-            Log.e(TAG, "getByUsername error: " + e.getMessage());
+            Log.e(TAG, "FindByUsername error: " + e.getMessage());
         } finally {
             if (cursor != null) cursor.close();
         }
-        return user;
-    }
-
-    /**
-     * Lấy danh sách tất cả admin.
-     */
-    public List<User> getAllAdmins() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        java.util.List<User> list = new java.util.ArrayList<>();
-        Cursor cursor = null;
-        try {
-            cursor = db.query(
-                    tableName, null,
-                    DBConstants.User.COL_ROLE + " = ?",
-                    new String[]{DBConstants.Role.ADMIN},
-                    null, null, null
-            );
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    list.add(fromCursor(cursor));
-                } while (cursor.moveToNext());
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "getAllAdmins error: " + e.getMessage());
-        } finally {
-            if (cursor != null) cursor.close();
-        }
-        return list;
+        return null;
     }
 }
