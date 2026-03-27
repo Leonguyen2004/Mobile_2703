@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobile_2703.R;
+import com.example.mobile_2703.activity.HomeActivity;
 import com.example.mobile_2703.constants.AppConstants;
 import com.example.mobile_2703.dao.ShowtimeDAO;
 import com.example.mobile_2703.dao.TicketDAO;
@@ -21,24 +22,30 @@ import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
- * BookingConfirmActivity - Xác nhận đặt vé.
+ * BookingConfirmActivity - Xác nhận đặt vé (hỗ trợ nhiều ghế).
  *
- * Hiển thị tóm tắt thông tin -> xác nhận tạo Ticket + decrement seats trong transaction.
+ * Nhận danh sách ghế dạng chuỗi phân cách bởi dấu phẩy (vd: "A1,A2,B3").
+ * Tạo một Ticket riêng cho mỗi ghế trong cùng một transaction SQLite.
  */
 public class BookingConfirmActivity extends AppCompatActivity {
 
     private ShowtimeDAO showtimeDAO;
-    private TicketDAO ticketDAO;
+    private TicketDAO   ticketDAO;
     private SessionManager sessionManager;
 
-    private int showtimeId;
-    private String seatNumber;
+    private int    showtimeId;
+    private String seatNumbers; // vd: "A1,A2,B3"
     private double totalPrice;
     private Showtime showtime;
+
+    private List<String> seatList = new ArrayList<>();
 
     private MaterialButton btnConfirm;
     private MaterialButton btnCancel;
@@ -52,19 +59,20 @@ public class BookingConfirmActivity extends AppCompatActivity {
         ticketDAO      = new TicketDAO(this);
         sessionManager = new SessionManager(this);
 
-        // Nhận dữ liệu từ Intent
         Intent intent = getIntent();
-        showtimeId = intent.getIntExtra(AppConstants.EXTRA_SHOWTIME_ID, -1);
-        seatNumber = intent.getStringExtra(AppConstants.EXTRA_SEAT_NUMBER);
-        totalPrice = intent.getDoubleExtra(AppConstants.EXTRA_TOTAL_PRICE, 0);
+        showtimeId  = intent.getIntExtra(AppConstants.EXTRA_SHOWTIME_ID, -1);
+        seatNumbers = intent.getStringExtra(AppConstants.EXTRA_SEAT_NUMBER);
+        totalPrice  = intent.getDoubleExtra(AppConstants.EXTRA_TOTAL_PRICE, 0);
 
-        if (showtimeId == -1 || seatNumber == null) {
+        if (showtimeId == -1 || seatNumbers == null || seatNumbers.isEmpty()) {
             Toast.makeText(this, "Lỗi: thiếu thông tin đặt vé", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Setup Toolbar
+        // Phân tách danh sách ghế từ chuỗi "A1,A2,B3"
+        seatList = Arrays.asList(seatNumbers.split(","));
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar_confirm);
         toolbar.setNavigationOnClickListener(v -> finish());
 
@@ -85,25 +93,28 @@ public class BookingConfirmActivity extends AppCompatActivity {
             return;
         }
 
-        TextView tvMovie   = findViewById(R.id.tv_confirm_movie);
-        TextView tvTheater = findViewById(R.id.tv_confirm_theater);
-        TextView tvDate    = findViewById(R.id.tv_confirm_date);
-        TextView tvTime    = findViewById(R.id.tv_confirm_time);
-        TextView tvSeat    = findViewById(R.id.tv_confirm_seat);
-        TextView tvPrice   = findViewById(R.id.tv_confirm_price);
+        TextView tvMovie    = findViewById(R.id.tv_confirm_movie);
+        TextView tvTheater  = findViewById(R.id.tv_confirm_theater);
+        TextView tvDate     = findViewById(R.id.tv_confirm_date);
+        TextView tvTime     = findViewById(R.id.tv_confirm_time);
+        TextView tvSeat     = findViewById(R.id.tv_confirm_seat);
+        TextView tvSeatCount = findViewById(R.id.tv_confirm_seat_count);
+        TextView tvPrice    = findViewById(R.id.tv_confirm_price);
 
         tvMovie.setText(showtime.getMovieTitle() != null ? showtime.getMovieTitle() : "");
         tvTheater.setText(showtime.getTheaterName() != null ? showtime.getTheaterName() : "");
         tvDate.setText(showtime.getShowDate());
         tvTime.setText(showtime.getShowTime());
-        tvSeat.setText(seatNumber);
+
+        // Hiển thị danh sách ghế
+        tvSeat.setText(String.join("  ·  ", seatList));
+        tvSeatCount.setText(seatList.size() + " ghế");
 
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
         tvPrice.setText(nf.format(totalPrice) + " đ");
     }
 
     private void confirmBooking() {
-        // Disable button ngay lập tức để tránh bấm 2 lần
         btnConfirm.setEnabled(false);
         btnCancel.setEnabled(false);
 
@@ -115,50 +126,50 @@ public class BookingConfirmActivity extends AppCompatActivity {
             return;
         }
 
-        // Tạo Ticket
-        Ticket ticket = new Ticket();
-        ticket.setUserId(userId);
-        ticket.setShowtimeId(showtimeId);
-        ticket.setSeatNumber(seatNumber);
-        ticket.setTotalPrice(totalPrice);
-        ticket.setStatus("confirmed");
+        String bookingTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                .format(new Date());
+        double pricePerSeat = showtime != null ? showtime.getPrice() : (totalPrice / seatList.size());
 
-        // Booking time hiện tại (ISO format)
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        ticket.setBookingTime(sdf.format(new Date()));
-
-        // Transaction: insert ticket + decrement seats
         SQLiteDatabase db = DatabaseHelper.getInstance(this).getWritableDatabase();
         db.beginTransaction();
         try {
-            long ticketId = ticketDAO.insert(ticket);
-            if (ticketId == -1) {
-                Toast.makeText(this, "Lỗi khi tạo vé!", Toast.LENGTH_SHORT).show();
-                btnConfirm.setEnabled(true);
-                btnCancel.setEnabled(true);
-                return;
+            // Insert một ticket cho mỗi ghế được chọn
+            for (String seat : seatList) {
+                Ticket ticket = new Ticket();
+                ticket.setUserId(userId);
+                ticket.setShowtimeId(showtimeId);
+                ticket.setSeatNumber(seat.trim());
+                ticket.setTotalPrice(pricePerSeat);
+                ticket.setStatus("confirmed");
+                ticket.setBookingTime(bookingTime);
+
+                long ticketId = ticketDAO.insert(ticket);
+                if (ticketId == -1) {
+                    Toast.makeText(this, "Lỗi khi tạo vé cho ghế " + seat, Toast.LENGTH_SHORT).show();
+                    btnConfirm.setEnabled(true);
+                    btnCancel.setEnabled(true);
+                    return;
+                }
             }
 
-            int updated = showtimeDAO.decreaseAvailableSeats(showtimeId);
-            if (updated <= 0) {
-                Toast.makeText(this, "Không còn ghế trống!", Toast.LENGTH_SHORT).show();
-                btnConfirm.setEnabled(true);
-                btnCancel.setEnabled(true);
-                return;
+            // Giảm số ghế trống đúng số lượng ghế đã đặt
+            for (int i = 0; i < seatList.size(); i++) {
+                int updated = showtimeDAO.decreaseAvailableSeats(showtimeId);
+                if (updated <= 0) {
+                    Toast.makeText(this, "Không còn đủ ghế trống!", Toast.LENGTH_SHORT).show();
+                    btnConfirm.setEnabled(true);
+                    btnCancel.setEnabled(true);
+                    return;
+                }
             }
 
             db.setTransactionSuccessful();
-            Toast.makeText(this, "Đặt vé thành công!", Toast.LENGTH_SHORT).show();
 
-            // Quay về HomeActivity nếu có, hoặc về MainActivity
-            Intent homeIntent;
-            try {
-                Class<?> homeClass = Class.forName("com.example.mobile_2703.activity.HomeActivity");
-                homeIntent = new Intent(this, homeClass);
-            } catch (ClassNotFoundException e) {
-                // Fallback về MainActivity nếu HomeActivity chưa có
-                homeIntent = new Intent(this, com.example.mobile_2703.MainActivity.class);
-            }
+            Toast.makeText(this,
+                    "Đặt " + seatList.size() + " vé thành công!",
+                    Toast.LENGTH_SHORT).show();
+
+            Intent homeIntent = new Intent(this, HomeActivity.class);
             homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(homeIntent);
             finish();
