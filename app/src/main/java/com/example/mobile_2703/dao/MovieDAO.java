@@ -1,3 +1,4 @@
+// FILE: app/src/main/java/com/example/mobile_2703/dao/MovieDAO.java
 package com.example.mobile_2703.dao;
 
 import android.content.ContentValues;
@@ -12,10 +13,6 @@ import com.example.mobile_2703.model.Movie;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * MovieDAO - DAO cho bảng movies.
- * Kế thừa BaseDAO, thêm: searchByTitle, getByGenre.
- */
 public class MovieDAO extends BaseDAO<Movie> {
 
     private static final String TAG = "MovieDAO";
@@ -25,7 +22,7 @@ public class MovieDAO extends BaseDAO<Movie> {
     }
 
     // =========================================================
-    // IMPLEMENT ABSTRACT METHODS
+    // ABSTRACT METHOD IMPLEMENTATIONS
     // =========================================================
 
     @Override
@@ -33,39 +30,66 @@ public class MovieDAO extends BaseDAO<Movie> {
         ContentValues cv = new ContentValues();
         cv.put(DBConstants.Movie.COL_TITLE,        movie.getTitle());
         cv.put(DBConstants.Movie.COL_GENRE,        movie.getGenre());
-        cv.put(DBConstants.Movie.COL_DURATION_MIN, movie.getDurationMin());
+        cv.put(DBConstants.Movie.COL_DURATION_MIN, movie.getDuration());
         cv.put(DBConstants.Movie.COL_DESCRIPTION,  movie.getDescription());
         cv.put(DBConstants.Movie.COL_POSTER_URL,   movie.getPosterUrl());
         cv.put(DBConstants.Movie.COL_RATING,       movie.getRating());
-        cv.put(DBConstants.Movie.COL_RELEASE_DATE, movie.getReleaseDate());
         return cv;
     }
 
     @Override
     protected Movie fromCursor(Cursor cursor) {
-        Movie movie = new Movie();
-        movie.setId(          getInt(cursor,    DBConstants.Movie.COL_ID));
-        movie.setTitle(       getString(cursor, DBConstants.Movie.COL_TITLE));
-        movie.setGenre(       getString(cursor, DBConstants.Movie.COL_GENRE));
-        movie.setDurationMin( getInt(cursor,    DBConstants.Movie.COL_DURATION_MIN));
-        movie.setDescription( getString(cursor, DBConstants.Movie.COL_DESCRIPTION));
-        movie.setPosterUrl(   getString(cursor, DBConstants.Movie.COL_POSTER_URL));
-        movie.setRating(      getDouble(cursor, DBConstants.Movie.COL_RATING));
-        movie.setReleaseDate( getString(cursor, DBConstants.Movie.COL_RELEASE_DATE));
-        return movie;
+        long   id          = getLong(cursor,   DBConstants.Movie.COL_ID);
+        String title       = getString(cursor, DBConstants.Movie.COL_TITLE);
+        String genre       = getString(cursor, DBConstants.Movie.COL_GENRE);
+        int    duration    = getInt(cursor,    DBConstants.Movie.COL_DURATION_MIN);
+        String description = getString(cursor, DBConstants.Movie.COL_DESCRIPTION);
+        String posterUrl   = getString(cursor, DBConstants.Movie.COL_POSTER_URL);
+        double rating      = getDouble(cursor, DBConstants.Movie.COL_RATING);
+        return new Movie(id, title, genre, duration, description, posterUrl, rating);
+    }
+
+    // =========================================================
+    // OVERRIDE getAll — sắp xếp theo tên
+    // =========================================================
+
+    @Override
+    public List<Movie> getAll() {
+        return getAll(DBConstants.Movie.COL_TITLE, true);
     }
 
     // =========================================================
     // CUSTOM QUERIES
     // =========================================================
 
-    /**
-     * Tìm phim theo từ khóa trong tên phim (LIKE search).
-     */
+    /** Tìm phim theo id. Trả về null nếu không tìm thấy. */
+    public Movie findById(long id) {
+        SQLiteDatabase db     = dbHelper.getReadableDatabase();
+        Cursor         cursor = null;
+        try {
+            cursor = db.query(
+                    tableName,
+                    null,
+                    DBConstants.Movie.COL_ID + " = ?",
+                    new String[]{String.valueOf(id)},
+                    null, null, null
+            );
+            if (cursor != null && cursor.moveToFirst()) {
+                return fromCursor(cursor);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "findById error: " + e.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return null;
+    }
+
+    /** Tìm kiếm phim theo từ khoá trong tên phim (LIKE %keyword%). */
     public List<Movie> searchByTitle(String keyword) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        List<Movie> list = new ArrayList<>();
-        Cursor cursor = null;
+        SQLiteDatabase db     = dbHelper.getReadableDatabase();
+        List<Movie>    list   = new ArrayList<>();
+        Cursor         cursor = null;
         try {
             cursor = db.query(
                     tableName,
@@ -79,20 +103,18 @@ public class MovieDAO extends BaseDAO<Movie> {
                 do { list.add(fromCursor(cursor)); } while (cursor.moveToNext());
             }
         } catch (Exception e) {
-            Log.e(TAG, "SearchByTitle error: " + e.getMessage());
+            Log.e(TAG, "searchByTitle error: " + e.getMessage());
         } finally {
             if (cursor != null) cursor.close();
         }
         return list;
     }
 
-    /**
-     * Lấy danh sách phim theo thể loại.
-     */
+    /** Lấy danh sách phim theo thể loại. */
     public List<Movie> getByGenre(String genre) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        List<Movie> list = new ArrayList<>();
-        Cursor cursor = null;
+        SQLiteDatabase db     = dbHelper.getReadableDatabase();
+        List<Movie>    list   = new ArrayList<>();
+        Cursor         cursor = null;
         try {
             cursor = db.query(
                     tableName,
@@ -106,7 +128,7 @@ public class MovieDAO extends BaseDAO<Movie> {
                 do { list.add(fromCursor(cursor)); } while (cursor.moveToNext());
             }
         } catch (Exception e) {
-            Log.e(TAG, "GetByGenre error: " + e.getMessage());
+            Log.e(TAG, "getByGenre error: " + e.getMessage());
         } finally {
             if (cursor != null) cursor.close();
         }

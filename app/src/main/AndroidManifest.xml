@@ -21,6 +21,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activity.MovieListActivity"
+            android:exported="false"
+            android:label="Phim Đang Chiếu"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".activity.MovieDetailActivity"
+            android:exported="false"
+            android:label="Chi Tiết Phim"
+            android:parentActivityName=".activity.MovieListActivity" />
+
+        <activity
+            android:name=".activity.TheaterListActivity"
+            android:exported="false"
+            android:label="Rạp Chiếu Phim"
+            android:parentActivityName=".MainActivity" />
+
     </application>
 
 </manifest>
