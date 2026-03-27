@@ -1,3 +1,4 @@
+// FILE: app/src/main/java/com/example/mobile_2703/utils/SessionManager.java
 package com.example.mobile_2703.utils;
 
 import android.content.Context;
@@ -6,13 +7,7 @@ import android.content.SharedPreferences;
 import com.example.mobile_2703.constants.AppConstants;
 
 /**
- * SessionManager - Lưu trạng thái đăng nhập vào SharedPreferences.
- *
- * USAGE:
- *   SessionManager session = new SessionManager(context);
- *   session.saveSession(user);   // Sau khi đăng nhập thành công
- *   session.isLoggedIn();        // Kiểm tra đã đăng nhập chưa
- *   session.clearSession();      // Đăng xuất
+ * SessionManager - Quản lý phiên đăng nhập bằng SharedPreferences.
  */
 public class SessionManager {
 
@@ -24,29 +19,42 @@ public class SessionManager {
         editor = prefs.edit();
     }
 
-    /** Lưu thông tin đăng nhập */
-    public void saveSession(int userId, String username) {
-        editor.putBoolean(AppConstants.PREF_IS_LOGGED_IN, true);
-        editor.putInt(AppConstants.PREF_USER_ID, userId);
+    /**
+     * Lưu thông tin đăng nhập.
+     */
+    public void saveLogin(long userId, String username) {
+        editor.putLong(AppConstants.PREF_USER_ID, userId);
         editor.putString(AppConstants.PREF_USERNAME, username);
+        editor.putBoolean(AppConstants.PREF_IS_LOGGED_IN, true);
         editor.apply();
     }
 
-    /** Xóa session (đăng xuất) */
-    public void clearSession() {
+    /**
+     * Đăng xuất: xóa toàn bộ SharedPreferences.
+     */
+    public void logout() {
         editor.clear();
         editor.apply();
     }
 
+    /**
+     * Kiểm tra trạng thái đăng nhập.
+     */
     public boolean isLoggedIn() {
         return prefs.getBoolean(AppConstants.PREF_IS_LOGGED_IN, false);
     }
 
-    public int getUserId() {
-        return prefs.getInt(AppConstants.PREF_USER_ID, -1);
+    /**
+     * Lấy userId của người dùng hiện tại.
+     */
+    public long getUserId() {
+        return prefs.getLong(AppConstants.PREF_USER_ID, -1L);
     }
 
+    /**
+     * Lấy username của người dùng hiện tại.
+     */
     public String getUsername() {
-        return prefs.getString(AppConstants.PREF_USERNAME, "");
+        return prefs.getString(AppConstants.PREF_USERNAME, null);
     }
 }
