@@ -1,5 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Brand colors -->
+    <color name="colorPrimary">#1565C0</color>
+    <color name="colorPrimaryDark">#0D47A1</color>
+    <color name="colorPrimaryVariant">#0D47A1</color>
+    <color name="colorAccent">#FF6F00</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <!-- Background & Surface -->
+    <color name="colorBackground">#F5F5F5</color>
+    <color name="colorSurface">#FFFFFF</color>
+
+    <!-- Text colors -->
+    <color name="colorTextPrimary">#212121</color>
+    <color name="colorTextSecondary">#757575</color>
+
+    <!-- Seat colors -->
+    <color name="colorSeatAvailable">#4CAF50</color>
+    <color name="colorSeatBooked">#F44336</color>
+    <color name="colorSeatSelected">#FFC107</color>
+
+    <!-- Status badge colors -->
+    <color name="colorStatusConfirmed">#4CAF50</color>
+    <color name="colorStatusCancelled">#F44336</color>
+
+    <!-- Basic -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Card menu icon tints -->
+    <color name="colorCardMovie">#1565C0</color>
+    <color name="colorCardTheater">#00897B</color>
+    <color name="colorCardShowtime">#6A1B9A</color>
+    <color name="colorCardTicket">#FF6F00</color>
 </resources>

@@ -1,49 +1,37 @@
+// FILE: app/src/main/java/com/example/mobile_2703/utils/ValidationUtils.java
 package com.example.mobile_2703.utils;
 
-import android.text.TextUtils;
 import android.util.Patterns;
 
 /**
- * ValidationUtils - Các hàm validate dữ liệu nhập.
- *
- * USAGE:
- *   if (!ValidationUtils.isValidEmail(email)) { ... }
+ * ValidationUtils - Tiện ích kiểm tra hợp lệ đầu vào.
  */
 public final class ValidationUtils {
 
     private ValidationUtils() {}
 
-    public static boolean isEmpty(String value) {
-        return TextUtils.isEmpty(value) || value.trim().isEmpty();
+    /**
+     * Kiểm tra username hợp lệ.
+     * Điều kiện: không null, không rỗng, >= 3 ký tự.
+     */
+    public static boolean isUsernameValid(String username) {
+        return username != null && !username.trim().isEmpty() && username.trim().length() >= 3;
     }
 
-    public static boolean isValidEmail(String email) {
-        return !isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    /**
+     * Kiểm tra password hợp lệ.
+     * Điều kiện: không null, không rỗng, >= 4 ký tự.
+     */
+    public static boolean isPasswordValid(String password) {
+        return password != null && !password.trim().isEmpty() && password.trim().length() >= 4;
     }
 
-    public static boolean isValidPassword(String password) {
-        return !isEmpty(password) && password.length() >= 6;
-    }
-
-    public static boolean isValidUsername(String username) {
-        return !isEmpty(username) && username.length() >= 3 && username.matches("[a-zA-Z0-9_]+");
-    }
-
-    public static boolean isPositiveNumber(String value) {
-        if (isEmpty(value)) return false;
-        try {
-            return Double.parseDouble(value) > 0;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    public static boolean isNonNegativeInt(String value) {
-        if (isEmpty(value)) return false;
-        try {
-            return Integer.parseInt(value) >= 0;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+    /**
+     * Kiểm tra email hợp lệ dùng android.util.Patterns.EMAIL_ADDRESS.
+     */
+    public static boolean isEmailValid(String email) {
+        return email != null
+                && !email.trim().isEmpty()
+                && Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches();
     }
 }

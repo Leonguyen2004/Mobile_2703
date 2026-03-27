@@ -7,11 +7,6 @@ package com.example.mobile_2703.constants;
  *   - Tránh lỗi typo khi dùng nhiều chỗ
  *   - Dễ rename khi cần thay đổi schema
  *   - Team dễ tham khảo cấu trúc database
- *
- * HOW TO ADD NEW TABLE:
- *   1. Thêm tên bảng vào class Table
- *   2. Tạo inner class chứa tên các cột
- *   3. Khai báo CREATE TABLE trong DatabaseHelper
  */
 public final class DBConstants {
 
@@ -20,57 +15,77 @@ public final class DBConstants {
     // =========================================================
     // DATABASE CONFIG
     // =========================================================
-    public static final String DATABASE_NAME    = "app_database.db";
-    public static final int    DATABASE_VERSION = 1;
-    // Tăng DATABASE_VERSION mỗi khi thay đổi schema
+    public static final String DATABASE_NAME    = "cinema_database.db";
+    public static final int    DATABASE_VERSION = 2;
 
     // =========================================================
     // TABLE NAMES
     // =========================================================
     public static final class Table {
-        public static final String USER     = "user";
-        public static final String CATEGORY = "category";
-        public static final String PRODUCT  = "product";
-        // TODO: Thêm tên bảng mới ở đây
-        // public static final String ORDER = "order_table";
+        public static final String USER      = "users";
+        public static final String MOVIE     = "movies";
+        public static final String THEATER   = "theaters";
+        public static final String SHOWTIME  = "showtimes";
+        public static final String TICKET    = "tickets";
     }
 
     // =========================================================
     // COLUMN NAMES - mỗi bảng một inner class
     // =========================================================
 
-    /** Cột bảng user */
+    /** Cột bảng users */
     public static final class User {
         public static final String COL_ID         = "id";
         public static final String COL_USERNAME   = "username";
         public static final String COL_PASSWORD   = "password";
         public static final String COL_FULL_NAME  = "full_name";
         public static final String COL_EMAIL      = "email";
+        public static final String COL_PHONE      = "phone";
         public static final String COL_ROLE       = "role";
         public static final String COL_CREATED_AT = "created_at";
     }
 
-    /** Cột bảng category */
-    public static final class Category {
-        public static final String COL_ID   = "id";
-        public static final String COL_NAME = "name";
-        public static final String COL_DESC = "description";
+    /** Cột bảng movies */
+    public static final class Movie {
+        public static final String COL_ID           = "id";
+        public static final String COL_TITLE        = "title";
+        public static final String COL_GENRE        = "genre";
+        public static final String COL_DURATION_MIN = "duration_min";
+        public static final String COL_DESCRIPTION  = "description";
+        public static final String COL_POSTER_URL   = "poster_url";
+        public static final String COL_RATING       = "rating";
+        public static final String COL_RELEASE_DATE = "release_date";
     }
 
-    /** Cột bảng product */
-    public static final class Product {
+    /** Cột bảng theaters */
+    public static final class Theater {
         public static final String COL_ID          = "id";
         public static final String COL_NAME        = "name";
-        public static final String COL_PRICE       = "price";
-        public static final String COL_DESCRIPTION = "description";
-        public static final String COL_IMAGE_URL   = "image_url";
-        public static final String COL_STOCK       = "stock";
-        public static final String COL_CATEGORY_ID = "category_id";
-        public static final String COL_CREATED_AT  = "created_at";
+        public static final String COL_LOCATION    = "location";
+        public static final String COL_TOTAL_SEATS = "total_seats";
     }
 
-    // TODO: Thêm inner class cột cho bảng mới
-    // public static final class Order { ... }
+    /** Cột bảng showtimes */
+    public static final class Showtime {
+        public static final String COL_ID              = "id";
+        public static final String COL_MOVIE_ID        = "movie_id";
+        public static final String COL_THEATER_ID      = "theater_id";
+        public static final String COL_SHOW_DATE       = "show_date";
+        public static final String COL_SHOW_TIME       = "show_time";
+        public static final String COL_PRICE           = "price";
+        public static final String COL_AVAILABLE_SEATS = "available_seats";
+    }
+
+    /** Cột bảng tickets */
+    public static final class Ticket {
+        public static final String COL_ID           = "id";
+        public static final String COL_USER_ID      = "user_id";
+        public static final String COL_SHOWTIME_ID  = "showtime_id";
+        public static final String COL_SEAT_NUMBER  = "seat_number";
+        public static final String COL_TOTAL_PRICE  = "total_price";
+        public static final String COL_BOOKING_TIME = "booking_time";
+        public static final String COL_STATUS       = "status";
+    }
 
     // =========================================================
     // COMMON VALUES
@@ -78,5 +93,10 @@ public final class DBConstants {
     public static final class Role {
         public static final String ADMIN = "admin";
         public static final String USER  = "user";
+    }
+
+    public static final class TicketStatus {
+        public static final String CONFIRMED = "confirmed";
+        public static final String CANCELLED = "cancelled";
     }
 }
