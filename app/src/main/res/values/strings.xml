@@ -1,3 +1,51 @@
 <resources>
-    <string name="app_name">Mobile_2703</string>
+    <!-- App -->
+    <string name="app_name">Movie Ticket App</string>
+
+    <!-- Home screen -->
+    <string name="home_toolbar_title">Movie Ticket App</string>
+    <string name="home_greeting_logged_in">Xin chào, %1$s!</string>
+    <string name="home_greeting_guest">Chào mừng bạn đến với Movie Ticket App</string>
+    <string name="home_subtitle_logged_in">Chúc bạn có trải nghiệm tuyệt vời</string>
+    <string name="home_subtitle_guest">Đăng nhập để đặt vé xem phim</string>
+
+    <!-- Menu cards -->
+    <string name="menu_movies">Danh sách Phim</string>
+    <string name="menu_movies_desc">Khám phá các bộ phim đang chiếu</string>
+    <string name="menu_theaters">Rạp Chiếu Phim</string>
+    <string name="menu_theaters_desc">Tìm rạp chiếu gần bạn</string>
+    <string name="menu_showtimes">Lịch Chiếu</string>
+    <string name="menu_showtimes_desc">Xem lịch chiếu tất cả phim</string>
+    <string name="menu_my_tickets">Vé của Tôi</string>
+    <string name="menu_my_tickets_desc">Xem và quản lý vé đã đặt</string>
+
+    <!-- Menu card emoji labels -->
+    <string name="emoji_movie">🎬</string>
+    <string name="emoji_theater">🏢</string>
+    <string name="emoji_showtime">📅</string>
+    <string name="emoji_ticket">🎫</string>
+
+    <!-- Overflow menu -->
+    <string name="menu_login">Đăng nhập</string>
+    <string name="menu_logout">Đăng xuất</string>
+    <string name="menu_my_tickets_overflow">Vé của tôi</string>
+
+    <!-- My Tickets screen -->
+    <string name="my_tickets_toolbar_title">Vé Của Tôi</string>
+    <string name="my_tickets_empty">Bạn chưa đặt vé nào</string>
+
+    <!-- Ticket item -->
+    <string name="ticket_movie_label">Phim:</string>
+    <string name="ticket_theater_label">Rạp:</string>
+    <string name="ticket_date_label">Ngày:</string>
+    <string name="ticket_time_label">Giờ:</string>
+    <string name="ticket_seat_label">Ghế:</string>
+    <string name="ticket_price_label">Giá:</string>
+    <string name="ticket_price_format">%,.0f VNĐ</string>
+    <string name="ticket_status_confirmed">ĐÃ XÁC NHẬN</string>
+    <string name="ticket_status_cancelled">ĐÃ HỦY</string>
+
+    <!-- Errors / messages -->
+    <string name="error_not_logged_in">Vui lòng đăng nhập để tiếp tục</string>
+    <string name="logout_success">Đã đăng xuất thành công</string>
 </resources>
