@@ -10,6 +10,7 @@ import com.example.mobile_2703.constants.DBConstants;
 import com.example.mobile_2703.model.Showtime;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -133,6 +134,42 @@ public class ShowtimeDAO extends BaseDAO<Showtime> {
             Log.e(TAG, "DecreaseAvailableSeats error: " + e.getMessage());
             return 0;
         }
+    }
+
+    /**
+     * Lấy thông tin chi tiết một suất chiếu (kèm movieTitle, theaterName).
+     */
+    public Showtime getWithDetails(int showtimeId) {
+        String sql = JOIN_QUERY
+                + " WHERE s." + DBConstants.Showtime.COL_ID + " = ?";
+        List<Showtime> list = queryWithJoin(sql, new String[]{String.valueOf(showtimeId)});
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    /**
+     * Lấy danh sách số ghế đã được đặt (CONFIRMED) cho một suất chiếu.
+     */
+    public List<String> getBookedSeats(int showtimeId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        List<String> seats = new ArrayList<>();
+        Cursor cursor = null;
+        try {
+            String sql = "SELECT " + DBConstants.Ticket.COL_SEAT_NUMBER
+                    + " FROM " + DBConstants.Table.TICKET
+                    + " WHERE " + DBConstants.Ticket.COL_SHOWTIME_ID + " = ?"
+                    + " AND " + DBConstants.Ticket.COL_STATUS + " = '" + DBConstants.TicketStatus.CONFIRMED + "'";
+            cursor = db.rawQuery(sql, new String[]{String.valueOf(showtimeId)});
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    seats.add(cursor.getString(0));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "GetBookedSeats error: " + e.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return seats;
     }
 
     // =========================================================

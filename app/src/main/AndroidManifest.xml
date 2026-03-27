@@ -39,6 +39,12 @@
             android:exported="false"
             android:label="Rạp Chiếu Phim"
             android:parentActivityName=".MainActivity" />
+        <activity android:name=".activity.ShowtimeListActivity"
+            android:exported="false" />
+        <activity android:name=".activity.SeatSelectionActivity"
+            android:exported="false" />
+        <activity android:name=".activity.BookingConfirmActivity"
+            android:exported="false" />
 
     </application>
 
