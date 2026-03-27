@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mobile_2703.LoginActivity;
 import com.example.mobile_2703.R;
 import com.example.mobile_2703.adapter.ShowtimeAdapter;
 import com.example.mobile_2703.constants.AppConstants;
@@ -64,31 +65,35 @@ public class ShowtimeListActivity extends AppCompatActivity
         List<Showtime> showtimes;
         Intent intent = getIntent();
 
-        if (intent.hasExtra(AppConstants.EXTRA_MOVIE_ID)) {
-            int movieId = intent.getIntExtra(AppConstants.EXTRA_MOVIE_ID, -1);
+        int movieId   = intent.getIntExtra(AppConstants.EXTRA_MOVIE_ID,   -1);
+        int theaterId = intent.getIntExtra(AppConstants.EXTRA_THEATER_ID, -1);
 
-            // Lấy tên phim để hiển thị trên Toolbar
+        if (movieId != -1 && theaterId != -1) {
+            // Lọc theo cả phim lẫn rạp (từ luồng: Rạp → Phim → Lịch chiếu)
+            MovieDAO   movieDAO   = new MovieDAO(this);
+            TheaterDAO theaterDAO = new TheaterDAO(this);
+            Movie   movie   = movieDAO.getById(movieId);
+            Theater theater = theaterDAO.getById(theaterId);
+
+            String movieName   = movie   != null ? movie.getTitle()   : "Phim";
+            String theaterName = theater != null ? theater.getName()  : "Rạp";
+            toolbar.setTitle(movieName + " · " + theaterName);
+
+            showtimes = showtimeDAO.getByMovieAndTheaterId(movieId, theaterId);
+
+        } else if (movieId != -1) {
+            // Lọc theo phim (từ MovieDetailActivity)
             MovieDAO movieDAO = new MovieDAO(this);
             Movie movie = movieDAO.getById(movieId);
-            if (movie != null) {
-                toolbar.setTitle(movie.getTitle());
-            } else {
-                toolbar.setTitle("Lịch chiếu");
-            }
+            toolbar.setTitle(movie != null ? movie.getTitle() : "Lịch chiếu");
 
             showtimes = showtimeDAO.getByMovieId(movieId);
 
-        } else if (intent.hasExtra(AppConstants.EXTRA_THEATER_ID)) {
-            int theaterId = intent.getIntExtra(AppConstants.EXTRA_THEATER_ID, -1);
-
-            // Lấy tên rạp để hiển thị trên Toolbar
+        } else if (theaterId != -1) {
+            // Lọc theo rạp
             TheaterDAO theaterDAO = new TheaterDAO(this);
             Theater theater = theaterDAO.getById(theaterId);
-            if (theater != null) {
-                toolbar.setTitle(theater.getName());
-            } else {
-                toolbar.setTitle("Lịch chiếu");
-            }
+            toolbar.setTitle(theater != null ? theater.getName() : "Lịch chiếu");
 
             showtimes = showtimeDAO.getByTheaterId(theaterId);
 
@@ -121,14 +126,8 @@ public class ShowtimeListActivity extends AppCompatActivity
         } else {
             // Lưu tạm showtimeId, yêu cầu đăng nhập
             pendingShowtimeId = showtime.getId();
-            try {
-                // Tìm LoginActivity bằng class name
-                Class<?> loginClass = Class.forName("com.example.mobile_2703.activity.LoginActivity");
-                Intent loginIntent = new Intent(this, loginClass);
-                startActivityForResult(loginIntent, AppConstants.REQUEST_LOGIN);
-            } catch (ClassNotFoundException e) {
-                Toast.makeText(this, "Vui lòng đăng nhập trước!", Toast.LENGTH_SHORT).show();
-            }
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivityForResult(loginIntent, AppConstants.REQUEST_LOGIN);
         }
     }
 

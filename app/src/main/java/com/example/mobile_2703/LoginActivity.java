@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
         if (!ValidationUtils.isPasswordValid(password)) {
-            tilPassword.setError("Mật khẩu tối thiểu 6 ký tự");
+            tilPassword.setError("Mật khẩu tối thiểu 4 ký tự");
             etPassword.requestFocus();
             return;
         }

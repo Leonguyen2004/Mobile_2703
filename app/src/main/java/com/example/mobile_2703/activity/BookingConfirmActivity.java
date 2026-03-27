@@ -107,7 +107,7 @@ public class BookingConfirmActivity extends AppCompatActivity {
         btnConfirm.setEnabled(false);
         btnCancel.setEnabled(false);
 
-        int userId = sessionManager.getUserId();
+        int userId = (int) sessionManager.getUserId();
         if (userId == -1) {
             Toast.makeText(this, "Vui lòng đăng nhập!", Toast.LENGTH_SHORT).show();
             btnConfirm.setEnabled(true);

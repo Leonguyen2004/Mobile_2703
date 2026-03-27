@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mobile_2703.LoginActivity;
 import com.example.mobile_2703.R;
 import com.example.mobile_2703.adapter.TicketAdapter;
 import com.example.mobile_2703.dao.TicketDAO;
@@ -74,7 +75,7 @@ public class MyTicketsActivity extends AppCompatActivity {
      * Tải danh sách vé của user hiện tại.
      */
     private void loadTickets() {
-        int userId = sessionManager.getUserId();
+        int userId = (int) sessionManager.getUserId();
         List<Ticket> tickets = ticketDAO.getByUserId(userId);
 
         adapter.setTickets(tickets);

@@ -20,10 +20,10 @@ public final class ValidationUtils {
 
     /**
      * Kiểm tra password hợp lệ.
-     * Điều kiện: không null, không rỗng, >= 6 ký tự.
+     * Điều kiện: không null, không rỗng, >= 4 ký tự.
      */
     public static boolean isPasswordValid(String password) {
-        return password != null && !password.trim().isEmpty() && password.trim().length() >= 6;
+        return password != null && !password.trim().isEmpty() && password.trim().length() >= 4;
     }
 
     /**

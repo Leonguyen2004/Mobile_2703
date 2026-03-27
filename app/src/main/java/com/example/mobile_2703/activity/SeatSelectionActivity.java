@@ -8,7 +8,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import com.example.mobile_2703.R;
 import com.example.mobile_2703.constants.AppConstants;
@@ -18,13 +17,15 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
- * SeatSelectionActivity - Hiển thị lưới ghế để user chọn ghế.
+ * SeatSelectionActivity - Hiển thị lưới ghế, cho phép chọn nhiều ghế cùng lúc.
  *
- * Tạo 30 ghế cố định (A1-A5, B1-B5, ... F1-F5).
  * Ghế đã đặt: đỏ (disabled). Ghế trống: xanh lá. Ghế đang chọn: vàng.
  */
 public class SeatSelectionActivity extends AppCompatActivity {
@@ -39,16 +40,18 @@ public class SeatSelectionActivity extends AppCompatActivity {
 
     private GridLayout gridSeats;
     private TextView tvSelectedSeat;
+    private TextView tvTotalPrice;
     private MaterialButton btnConfirm;
-    private TextView tvMovie, tvTheater, tvDatetime, tvPrice;
+    private TextView tvMovie, tvTheater, tvDatetime, tvUnitPrice;
 
-    private String selectedSeat = null;
-    private TextView selectedSeatView = null;
+    /** Danh sách ghế đang được chọn */
+    private final ArrayList<String> selectedSeats = new ArrayList<>();
+    /** Map từ seatLabel → TextView tương ứng trong lưới */
+    private final Map<String, TextView> seatViewMap = new HashMap<>();
 
-    // Màu
-    private static final int COLOR_AVAILABLE = 0xFF4CAF50; // Xanh lá
-    private static final int COLOR_BOOKED    = 0xFFF44336; // Đỏ
-    private static final int COLOR_SELECTED  = 0xFFFFEB3B; // Vàng
+    private static final int COLOR_AVAILABLE = 0xFF4CAF50;
+    private static final int COLOR_BOOKED    = 0xFFF44336;
+    private static final int COLOR_SELECTED  = 0xFFFFEB3B;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,28 +67,30 @@ public class SeatSelectionActivity extends AppCompatActivity {
             return;
         }
 
-        // Setup Toolbar
         MaterialToolbar toolbar = findViewById(R.id.toolbar_seat);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Bind views
-        tvMovie        = findViewById(R.id.tv_seat_movie);
-        tvTheater      = findViewById(R.id.tv_seat_theater);
-        tvDatetime     = findViewById(R.id.tv_seat_datetime);
-        tvPrice        = findViewById(R.id.tv_seat_price);
-        gridSeats      = findViewById(R.id.grid_seats);
+        tvMovie      = findViewById(R.id.tv_seat_movie);
+        tvTheater    = findViewById(R.id.tv_seat_theater);
+        tvDatetime   = findViewById(R.id.tv_seat_datetime);
+        tvUnitPrice  = findViewById(R.id.tv_seat_price);
+        gridSeats    = findViewById(R.id.grid_seats);
         tvSelectedSeat = findViewById(R.id.tv_selected_seat);
+        tvTotalPrice   = findViewById(R.id.tv_total_price);
         btnConfirm     = findViewById(R.id.btn_confirm_seat);
 
         loadShowtimeInfo();
         buildSeatGrid();
 
         btnConfirm.setOnClickListener(v -> {
-            if (selectedSeat != null && showtime != null) {
+            if (!selectedSeats.isEmpty() && showtime != null) {
+                String seats = String.join(",", selectedSeats);
+                double total = showtime.getPrice() * selectedSeats.size();
+
                 Intent intent = new Intent(this, BookingConfirmActivity.class);
                 intent.putExtra(AppConstants.EXTRA_SHOWTIME_ID, showtimeId);
-                intent.putExtra(AppConstants.EXTRA_SEAT_NUMBER, selectedSeat);
-                intent.putExtra(AppConstants.EXTRA_TOTAL_PRICE, showtime.getPrice());
+                intent.putExtra(AppConstants.EXTRA_SEAT_NUMBER, seats);
+                intent.putExtra(AppConstants.EXTRA_TOTAL_PRICE, total);
                 startActivity(intent);
                 finish();
             }
@@ -105,14 +110,14 @@ public class SeatSelectionActivity extends AppCompatActivity {
         tvDatetime.setText(showtime.getShowDate() + " - " + showtime.getShowTime());
 
         NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
-        tvPrice.setText(nf.format(showtime.getPrice()) + " đ");
+        tvUnitPrice.setText(nf.format(showtime.getPrice()) + " đ / ghế");
     }
 
     private void buildSeatGrid() {
         gridSeats.removeAllViews();
         gridSeats.setColumnCount(SEATS_PER_ROW);
+        seatViewMap.clear();
 
-        // Lấy danh sách ghế đã đặt
         List<String> bookedSeats = showtimeDAO.getBookedSeats(showtimeId);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -133,16 +138,15 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 seatView.setLayoutParams(params);
 
                 if (bookedSeats.contains(seatLabel)) {
-                    // Ghế đã đặt
                     seatView.setBackgroundColor(COLOR_BOOKED);
                     seatView.setTextColor(0xFFFFFFFF);
                     seatView.setEnabled(false);
                     seatView.setAlpha(0.7f);
                 } else {
-                    // Ghế trống
                     seatView.setBackgroundColor(COLOR_AVAILABLE);
                     seatView.setTextColor(0xFFFFFFFF);
                     seatView.setOnClickListener(v -> onSeatClicked(seatView, seatLabel));
+                    seatViewMap.put(seatLabel, seatView);
                 }
 
                 gridSeats.addView(seatView);
@@ -151,27 +155,38 @@ public class SeatSelectionActivity extends AppCompatActivity {
     }
 
     private void onSeatClicked(TextView seatView, String seatLabel) {
-        // Bỏ chọn ghế cũ (nếu có)
-        if (selectedSeatView != null) {
-            selectedSeatView.setBackgroundColor(COLOR_AVAILABLE);
+        if (selectedSeats.contains(seatLabel)) {
+            // Bỏ chọn ghế này
+            selectedSeats.remove(seatLabel);
+            seatView.setBackgroundColor(COLOR_AVAILABLE);
+            seatView.setTextColor(0xFFFFFFFF);
+        } else {
+            // Thêm ghế vào danh sách chọn
+            selectedSeats.add(seatLabel);
+            seatView.setBackgroundColor(COLOR_SELECTED);
+            seatView.setTextColor(0xFF000000);
         }
 
-        // Nếu click vào ghế đang chọn → bỏ chọn
-        if (seatLabel.equals(selectedSeat)) {
-            selectedSeat = null;
-            selectedSeatView = null;
+        updateBottomBar();
+    }
+
+    private void updateBottomBar() {
+        NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
+
+        if (selectedSeats.isEmpty()) {
             tvSelectedSeat.setText("Chưa chọn ghế");
+            tvTotalPrice.setText("");
             btnConfirm.setEnabled(false);
-            return;
+        } else {
+            int count = selectedSeats.size();
+            String seatList = String.join(", ", selectedSeats);
+            tvSelectedSeat.setText("Ghế: " + seatList + " (" + count + " ghế)");
+
+            if (showtime != null) {
+                double total = showtime.getPrice() * count;
+                tvTotalPrice.setText("Tổng: " + nf.format(total) + " đ");
+            }
+            btnConfirm.setEnabled(true);
         }
-
-        // Chọn ghế mới
-        selectedSeat = seatLabel;
-        selectedSeatView = seatView;
-        seatView.setBackgroundColor(COLOR_SELECTED);
-        seatView.setTextColor(0xFF000000);
-
-        tvSelectedSeat.setText("Ghế: " + seatLabel);
-        btnConfirm.setEnabled(true);
     }
 }

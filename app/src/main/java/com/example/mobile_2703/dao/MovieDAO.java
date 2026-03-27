@@ -110,6 +110,35 @@ public class MovieDAO extends BaseDAO<Movie> {
         return list;
     }
 
+    /**
+     * Lấy danh sách phim đang chiếu tại một rạp cụ thể (qua bảng showtimes).
+     * SELECT DISTINCT m.* FROM movies m
+     * INNER JOIN showtimes s ON s.movie_id = m.id
+     * WHERE s.theater_id = ?
+     */
+    public List<Movie> getByTheaterId(int theaterId) {
+        SQLiteDatabase db     = dbHelper.getReadableDatabase();
+        List<Movie>    list   = new ArrayList<>();
+        Cursor         cursor = null;
+        String query =
+                "SELECT DISTINCT m.* FROM " + DBConstants.Table.MOVIE + " m"
+                + " INNER JOIN " + DBConstants.Table.SHOWTIME + " s"
+                + " ON s." + DBConstants.Showtime.COL_MOVIE_ID + " = m." + DBConstants.Movie.COL_ID
+                + " WHERE s." + DBConstants.Showtime.COL_THEATER_ID + " = ?"
+                + " ORDER BY m." + DBConstants.Movie.COL_TITLE + " ASC";
+        try {
+            cursor = db.rawQuery(query, new String[]{String.valueOf(theaterId)});
+            if (cursor != null && cursor.moveToFirst()) {
+                do { list.add(fromCursor(cursor)); } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "getByTheaterId error: " + e.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return list;
+    }
+
     /** Lấy danh sách phim theo thể loại. */
     public List<Movie> getByGenre(String genre) {
         SQLiteDatabase db     = dbHelper.getReadableDatabase();
